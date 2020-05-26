@@ -1,0 +1,10 @@
+main: me.autopvpkit.AutoPvPKit
+version: 2.0
+author: "Al3rb / SandwichaKSA / TheGaming999"
+name: "AutoPvPKit-Reborn"
+softdepend: [WorldEdit, WorldGuard]
+commands:
+  autopvpkit:
+    usage: /<command>
+    description: main command
+    aliases: [apk, apkit, apvpkit]
