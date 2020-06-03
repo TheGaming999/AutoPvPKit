@@ -2,9 +2,11 @@
 # default permssions >
 # autopvpkit.kit = access to '/apk kit' command
 # autopvpkit.kits.<name> = access to a kit when you join/respawn/worldchange/worldguard-region-entry
+# autopvpkit.savekit = access to '/savekit' command which saves kit item slots to the slots you like them to be placed on when the kit gets selected for you.
 # admin permissions >
 # autopvpkit.kit.other = access to give other players a kit using '/apk kit <kit> <player>'
 # autopvpkit.kits.* = access to all kits
+# autopvpkit.admin = access to other admin commands: /apk reload, /apk load, /apk save
 Settings:
   change-on-spawn: true
   change-on-respawn: true
@@ -17,6 +19,10 @@ Settings:
   kit-no-permission: "&7Sorry, but you don't have permission to use this kit."
   player-does-not-exist: "&7Unable to find player: &c%player%&7."
   kit-other-no-permission: "&cYou don't have permission to give kit to other players."
+  # placeholders: %kit%
+  kit-save: "&7Your current kit has been saved with this inventory."
+  kit-save-no-selected-kit: "&7You don't have any kit selected!"
+  kit-save-no-permission: "&7Sorry, but you don't have permission to save kits."
   # placeholders: %kit% %kit_displayname%
   kit-message: "&7Selected kit: &c%kit%&7."
   kit-message-other: "&7Given kit &c%kit% &7to &c%player%&7."

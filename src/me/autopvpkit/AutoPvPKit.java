@@ -1,28 +1,38 @@
 package me.autopvpkit;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import me.autopvpkit.commands.AutoPvPKitCommand;
+import me.autopvpkit.commands.SaveKitCommand;
+import me.autopvpkit.data.Kit;
 import me.autopvpkit.data.KitsManager;
 import me.autopvpkit.data.PlayerManager;
+import me.autopvpkit.data.SavedItemSlots;
 import me.autopvpkit.hooks.WorldGuardHook;
 import me.autopvpkit.listeners.DeathDropListener;
 import me.autopvpkit.listeners.ItemDropListener;
 import me.autopvpkit.listeners.JoinListener;
 import me.autopvpkit.listeners.RespawnListener;
 import me.autopvpkit.listeners.WorldChangeListener;
+import me.autopvpkit.utils.ConfigManager;
 
 public class AutoPvPKit extends JavaPlugin {
 
 	private KitsManager kitsManager;
 	private PlayerManager playerManager;
+	private ConfigManager configManager;
 	private Set<String> disabledWorlds;
+	private FileConfiguration config;
+	private FileConfiguration savedKits;
 	private boolean changeOnSpawn;
 	private boolean changeOnRespawn;
 	private boolean changeOnWorldChange;
@@ -40,12 +50,19 @@ public class AutoPvPKit extends JavaPlugin {
 	private DeathDropListener deathDropListener;
 	private AutoPvPKitCommand autoPvpKitCommand;
 	private WorldGuardHook worldGuardHook;
+	private SavedItemSlots savedItemSlots;
+	private SaveKitCommand saveKitCommand;
 	
+	
+	private static AutoPvPKit instance;
 	public Set<String> hasKit;
+	private Map<String, Kit> lastSelectedKits;
 	
 	public void onEnable() {
-		getConfig().options().copyDefaults(true);
-		saveDefaultConfig();
+		lastSelectedKits = new ConcurrentHashMap<>();
+		configManager = new ConfigManager(this);
+		config = configManager.loadConfig("config.yml");
+		savedKits = configManager.loadConfig("saved_kits.yml");
 		disabledWorlds = new HashSet<>();
 		hasKit = new HashSet<>();
 		// for silly users
@@ -68,20 +85,28 @@ public class AutoPvPKit extends JavaPlugin {
 		
         registerListeners();
 		if(disableKitDrops || disableKitDropsOnDeath) {
-			playerManager = new PlayerManager();
+			
 		}
+
 		if(worldGuardHook_ && Bukkit.getPluginManager().isPluginEnabled("WorldGuard")) {
 			worldGuardHook = new WorldGuardHook(this);
 		}
 		kitsManager = new KitsManager(this);
 		autoPvpKitCommand = new AutoPvPKitCommand(this);
 		getCommand("autopvpkit").setExecutor(autoPvpKitCommand);
+		saveKitCommand = new SaveKitCommand(this);
+		getCommand("savekit").setExecutor(saveKitCommand);
 		Bukkit.getConsoleSender().sendMessage(colorize("&e[&9AutoPvPKit&e] &aLoading kits..."));
 		kitsManager.loadKits();
+		savedItemSlots = new SavedItemSlots();
+		playerManager = new PlayerManager(this);
+		playerManager.loadSavedPlayerKits();
 		Bukkit.getConsoleSender().sendMessage(colorize("&e[&9AutoPvPKit&e] &aEnabled."));
+		instance = this;
 	}
 	
 	public void onDisable() {
+		playerManager.saveSavedPlayerKits();
 		Bukkit.getConsoleSender().sendMessage(colorize("&e[&9AutoPvPKit&e] &cDisabled."));
 	}
 	
@@ -164,6 +189,75 @@ public class AutoPvPKit extends JavaPlugin {
 
 	public void setWorldGuardRegion(String worldGuardRegion) {
 		this.worldGuardRegion = worldGuardRegion;
+	}
+
+	public FileConfiguration getConfig() {
+		return config;
+	}
+
+	public void setConfig(FileConfiguration config) {
+		this.config = config;
+	}
+
+	public FileConfiguration getSavedKitsConfig() {
+		return savedKits;
+	}
+
+	public void setSavedKitsConfig(FileConfiguration savedKits) {
+		this.savedKits = savedKits;
+	}
+	
+	public void reloadConfig() {
+		this.configManager.reloadConfig("config.yml");
+	}
+	
+	public void saveConfig() {
+		this.configManager.saveConfig("config.yml");
+	}
+	
+	public void reloadSavedKitsConfig() {
+		this.configManager.reloadConfig("saved_kits.yml");
+	}
+	
+	public void saveSavedKitsConfig() {
+		this.configManager.saveConfig("saved_kits.yml");
+	}
+
+	public SavedItemSlots getSavedItemSlots() {
+		return savedItemSlots;
+	}
+
+	public void setSavedItemSlots(SavedItemSlots savedItemSlots) {
+		this.savedItemSlots = savedItemSlots;
+	}
+
+	/**
+	 * 
+	 * @param name player's name
+	 * @return
+	 */
+	public Kit getPlayerLastSelectedKit(String name) {
+		return lastSelectedKits.get(name);
+	}
+	
+	public Map<String, Kit> getLastSelectedKits() {
+		return lastSelectedKits;
+	}
+
+	public void setLastSelectedKits(Map<String, Kit> lastSelectedKits) {
+		this.lastSelectedKits = lastSelectedKits;
+	}
+	
+	public SaveKitCommand getSaveKitCommand() {
+		return this.saveKitCommand;
+	}
+
+	public static AutoPvPKit getInstance() {
+		return instance;
+	}
+
+	public static void setInstance(AutoPvPKit instance) {
+		AutoPvPKit.instance = instance;
 	}
 	
 }

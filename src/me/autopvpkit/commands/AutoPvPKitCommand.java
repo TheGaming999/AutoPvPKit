@@ -55,12 +55,35 @@ public class AutoPvPKitCommand implements CommandExecutor {
 				} else if (args[0].equalsIgnoreCase("kit")) {
 					sender.sendMessage(colorize("&7/apk kit <name> [player] &c- &bselect kit for you or another player"));
 				} else if (args[0].equalsIgnoreCase("reload")) {
+					if(!sender.hasPermission("autopvpkit.admin")) {
+						return true;
+					}
 					sender.sendMessage(colorize("&eReloading..."));
 					Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+					  plugin.onDisable();
 					  plugin.reloadConfig();
 					  plugin.onEnable();
 					});
 					sender.sendMessage(colorize("&aPlugin reloaded."));
+				} else if (args[0].equalsIgnoreCase("load")) {
+					if(!sender.hasPermission("autopvpkit.admin")) {
+						return true;
+					}
+					sender.sendMessage(colorize("&eLoading..."));
+					Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+					  plugin.reloadConfig();
+					  plugin.onEnable();
+					});
+					sender.sendMessage(colorize("&aPlugin data loaded."));
+				} else if (args[0].equalsIgnoreCase("save")) {
+					if(!sender.hasPermission("autopvpkit.admin")) {
+						return true;
+					}
+					sender.sendMessage(colorize("&eSaving..."));
+					Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+					  plugin.getPlayerManager().saveSavedPlayerKits();
+					});
+					sender.sendMessage(colorize("&aPlugin data saved."));
 				}
 			} else if (args.length == 2) {
 				if(args[0].equalsIgnoreCase("kit")) {
@@ -75,9 +98,11 @@ public class AutoPvPKitCommand implements CommandExecutor {
                     	 return true;
                      }
                      String ckit = StringUtils.capitalize(kit);
+                     String name = p.getName();
 						if(p.hasPermission("autopvpkit.kits." + kit) || p.hasPermission("autopvpkit.kits.*")) {
 							Kit k = plugin.getKitsManager().getKit(kit);
 							PlayerInventory pinv = p.getInventory();
+							pinv.clear();
 							ItemStack helmet = k.getHelmet();
 							if(helmet != null) {
 								pinv.setHelmet(helmet);
@@ -100,12 +125,25 @@ public class AutoPvPKitCommand implements CommandExecutor {
 							plugin.getPlayerManager().setPlayerItems(p.getName(), new HashSet<>(items.values()));
 							});
 							}
+							if(plugin.getPlayerManager().getSavedPlayerKits().containsKey(name + "#" + k.getName())) {
+								plugin.getPlayerManager().getSavedPlayerKit(name, kit).getSavedItemSlots().entrySet().forEach(entry -> {
+									int slot = entry.getKey();
+									ItemStack itemStack = entry.getValue();
+									pinv.setItem(slot, itemStack);
+								});
+								plugin.hasKit.add(name);
+								plugin.getLastSelectedKits().put(name, k);
+								p.sendMessage(colorize(plugin.getConfig().getString("Settings.kit-message")).replace("%kit%", ckit).replace("%kit_displayname%", k.getDisplayName()));
+								return true;
+							}
 							items.keySet().forEach(slot -> {
 								pinv.setItem(slot, items.get(slot));
 							});
+							plugin.hasKit.add(name);
+							plugin.getLastSelectedKits().put(name, k);
 							p.sendMessage(colorize(plugin.getConfig().getString("Settings.kit-message")).replace("%kit%", ckit).replace("%kit_displayname%", k.getDisplayName()));
 						} else {
-							p.sendMessage(colorize(plugin.getConfig().getString("Settings.kit-no-permission")).replace("%kit%", ckit));
+							p.sendMessage(colorize(plugin.getConfig().getString("Settings.kit-no-permission")).replace("%kit%", ckit).replace("%kit_displayname%", ckit));
 						}
 				}
 			} else if (args.length == 3) {
@@ -123,10 +161,12 @@ public class AutoPvPKitCommand implements CommandExecutor {
                 	sender.sendMessage(colorize(plugin.getConfig().getString("Settings.kit-other-no-permission")));
                 	return true;
                 }
+                String name = p.getName();
                 String ckit = StringUtils.capitalize(kit);
 					if(sender.hasPermission("autopvpkit.kits." + kit) || sender.hasPermission("autopvpkit.kits.*")) {
 						Kit k = plugin.getKitsManager().getKit(kit);
 						PlayerInventory pinv = p.getInventory();
+						pinv.clear();
 						ItemStack helmet = k.getHelmet();
 						if(helmet != null) {
 							pinv.setHelmet(helmet);
@@ -149,13 +189,27 @@ public class AutoPvPKitCommand implements CommandExecutor {
 						plugin.getPlayerManager().setPlayerItems(p.getName(), new HashSet<>(items.values()));
 						});
 						}
+						if(plugin.getPlayerManager().getSavedPlayerKits().containsKey(name + "#" + k.getName())) {
+							plugin.getPlayerManager().getSavedPlayerKit(name, kit).getSavedItemSlots().entrySet().forEach(entry -> {
+								int slot = entry.getKey();
+								ItemStack itemStack = entry.getValue();
+								pinv.setItem(slot, itemStack);
+							});
+							plugin.hasKit.add(name);
+							plugin.getLastSelectedKits().put(name, k);
+							p.sendMessage(colorize(plugin.getConfig().getString("Settings.kit-message")).replace("%kit%", ckit).replace("%kit_displayname%", k.getDisplayName()));
+							sender.sendMessage(colorize(plugin.getConfig().getString("Settings.kit-message-other")).replace("%kit%", ckit).replace("%kit_displayname%", k.getDisplayName()).replace("%player%", p.getName()));
+							return true;
+						}
 						items.keySet().forEach(slot -> {
 							pinv.setItem(slot, items.get(slot));
 						});
+						plugin.hasKit.add(name);
+						plugin.getLastSelectedKits().put(name, k);
 						p.sendMessage(colorize(plugin.getConfig().getString("Settings.kit-message")).replace("%kit%", ckit).replace("%kit_displayname%", k.getDisplayName()));
 						sender.sendMessage(colorize(plugin.getConfig().getString("Settings.kit-message-other")).replace("%kit%", ckit).replace("%kit_displayname%", k.getDisplayName()).replace("%player%", p.getName()));
 					} else {
-						sender.sendMessage(colorize(plugin.getConfig().getString("Settings.kit-no-permission")).replace("%kit%", ckit));
+						sender.sendMessage(colorize(plugin.getConfig().getString("Settings.kit-no-permission")).replace("%kit%", ckit).replace("%kit_displayname%", ckit));
 					}
 			}
 		}

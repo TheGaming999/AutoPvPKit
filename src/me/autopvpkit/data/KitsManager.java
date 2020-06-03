@@ -1,7 +1,7 @@
 package me.autopvpkit.data;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +21,7 @@ public class KitsManager {
 	private FileConfiguration config;
 	private Map<String, Kit> kits;
 	
-	public KitsManager(AutoPvPKit plugin) {this.plugin = plugin; this.config = this.plugin.getConfig(); this.kits = new HashMap<>();}
+	public KitsManager(AutoPvPKit plugin) {this.plugin = plugin; this.config = this.plugin.getConfig(); this.kits = new LinkedHashMap<>();}
 	
 	private String colorize(String string) {
 		return ChatColor.translateAlternateColorCodes('&', string);
@@ -207,6 +207,7 @@ public class KitsManager {
 			});
 			this.kits.put(kitName, kit);
 		});
+
 	}
 	
 	public Map<String, Kit> getKits() {

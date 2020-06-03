@@ -30,6 +30,7 @@ public class RespawnListener implements Listener {
 		if(plugin.isDisabledWorld(p.getWorld())) {
 			return;
 		}
+		String name = p.getName();
 		PlayerInventory pinv = p.getInventory();
 		pinv.clear();
 		plugin.getKitsManager().getKits().keySet().forEach(kit -> {
@@ -58,9 +59,21 @@ public class RespawnListener implements Listener {
 				plugin.getPlayerManager().setPlayerItems(p.getName(), new HashSet<>(items.values()));
 				});
 				}
+				if(plugin.getPlayerManager().getSavedPlayerKits().containsKey(name + "#" + k.getName())) {
+					plugin.getPlayerManager().getSavedPlayerKit(name, kit).getSavedItemSlots().entrySet().forEach(entry -> {
+						int slot = entry.getKey();
+						ItemStack itemStack = entry.getValue();
+						pinv.setItem(slot, itemStack);
+					});
+					plugin.hasKit.add(name);
+					plugin.getLastSelectedKits().put(name, k);
+					return;
+				}
 				items.keySet().forEach(slot -> {
 					pinv.setItem(slot, items.get(slot));
 				});
+				plugin.hasKit.add(name);
+				plugin.getLastSelectedKits().put(name, k);
 			}
 		});
 		p.updateInventory();
