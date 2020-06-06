@@ -11,6 +11,7 @@ import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import me.autopvpkit.api.AutoPvPKitAPI;
 import me.autopvpkit.commands.AutoPvPKitCommand;
 import me.autopvpkit.commands.SaveKitCommand;
 import me.autopvpkit.data.Kit;
@@ -52,7 +53,7 @@ public class AutoPvPKit extends JavaPlugin {
 	private WorldGuardHook worldGuardHook;
 	private SavedItemSlots savedItemSlots;
 	private SaveKitCommand saveKitCommand;
-	
+	private AutoPvPKitAPI apkAPI;
 	
 	private static AutoPvPKit instance;
 	public Set<String> hasKit;
@@ -103,6 +104,7 @@ public class AutoPvPKit extends JavaPlugin {
 		playerManager.loadSavedPlayerKits();
 		Bukkit.getConsoleSender().sendMessage(colorize("&e[&9AutoPvPKit&e] &aEnabled."));
 		instance = this;
+		apkAPI = new AutoPvPKitAPI();
 	}
 	
 	public void onDisable() {
@@ -252,6 +254,14 @@ public class AutoPvPKit extends JavaPlugin {
 		return this.saveKitCommand;
 	}
 
+	public AutoPvPKitCommand getAutoPvPKitCommand() {
+		return this.autoPvpKitCommand;
+	}
+	
+	public AutoPvPKitAPI getAPI() {
+		return this.apkAPI;
+	}
+	
 	public static AutoPvPKit getInstance() {
 		return instance;
 	}

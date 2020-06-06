@@ -1,5 +1,6 @@
 package me.autopvpkit.commands;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -7,6 +8,7 @@ import org.bukkit.entity.Player;
 
 import me.autopvpkit.AutoPvPKit;
 import me.autopvpkit.data.Kit;
+import me.autopvpkit.events.PlayerKitSaveEvent;
 
 public class SaveKitCommand implements CommandExecutor {
 
@@ -45,6 +47,11 @@ public class SaveKitCommand implements CommandExecutor {
 	    	return true;
 	    }
 	    Kit kit = plugin.getPlayerLastSelectedKit(p.getName());
+	    PlayerKitSaveEvent se = new PlayerKitSaveEvent(p, kit);
+	    Bukkit.getPluginManager().callEvent(se);
+	    if(se.isCancelled()) {
+	    	return true;
+	    }
 	    try {
 	    plugin.getPlayerManager().registerSavedPlayerKit(p);
 	    sender.sendMessage(colorize(plugin.getConfig().getString("Settings.kit-save")).replace("%kit%", kit.getName()).replace("%kit_displayname%", kit.getDisplayName()));

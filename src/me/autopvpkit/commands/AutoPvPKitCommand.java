@@ -1,19 +1,16 @@
 package me.autopvpkit.commands;
 
-import java.util.HashSet;
-import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 
 import me.autopvpkit.AutoPvPKit;
 import me.autopvpkit.data.Kit;
+import me.autopvpkit.events.ChangeReason;
+import me.autopvpkit.events.PlayerKitChangeEvent;
 
 public class AutoPvPKitCommand implements CommandExecutor {
 
@@ -98,49 +95,13 @@ public class AutoPvPKitCommand implements CommandExecutor {
                     	 return true;
                      }
                      String ckit = StringUtils.capitalize(kit);
-                     String name = p.getName();
 						if(p.hasPermission("autopvpkit.kits." + kit) || p.hasPermission("autopvpkit.kits.*")) {
-							Kit k = plugin.getKitsManager().getKit(kit);
-							PlayerInventory pinv = p.getInventory();
-							pinv.clear();
-							ItemStack helmet = k.getHelmet();
-							if(helmet != null) {
-								pinv.setHelmet(helmet);
-							}
-							ItemStack chestplate = k.getChestplate();
-							if(chestplate != null) {
-								pinv.setChestplate(chestplate);
-							}
-							ItemStack leggings = k.getLeggings();
-							if(leggings != null) {
-								pinv.setLeggings(leggings);
-							}
-							ItemStack boots = k.getBoots();
-							if(boots != null) {
-								pinv.setBoots(boots);
-							}
-							Map<Integer, ItemStack> items = k.getItems();
-							if(plugin.isDisableKitDrops() || plugin.isDisableKitDropsOnDeath()) {
-							Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-							plugin.getPlayerManager().setPlayerItems(p.getName(), new HashSet<>(items.values()));
-							});
-							}
-							if(plugin.getPlayerManager().getSavedPlayerKits().containsKey(name + "#" + k.getName())) {
-								plugin.getPlayerManager().getSavedPlayerKit(name, kit).getSavedItemSlots().entrySet().forEach(entry -> {
-									int slot = entry.getKey();
-									ItemStack itemStack = entry.getValue();
-									pinv.setItem(slot, itemStack);
-								});
-								plugin.hasKit.add(name);
-								plugin.getLastSelectedKits().put(name, k);
-								p.sendMessage(colorize(plugin.getConfig().getString("Settings.kit-message")).replace("%kit%", ckit).replace("%kit_displayname%", k.getDisplayName()));
+							PlayerKitChangeEvent ce = new PlayerKitChangeEvent(p, ChangeReason.COMMAND);
+							Bukkit.getPluginManager().callEvent(ce);
+							if(ce.isCancelled()) {
 								return true;
 							}
-							items.keySet().forEach(slot -> {
-								pinv.setItem(slot, items.get(slot));
-							});
-							plugin.hasKit.add(name);
-							plugin.getLastSelectedKits().put(name, k);
+							Kit k = plugin.getAPI().setKit(p, kit, true);
 							p.sendMessage(colorize(plugin.getConfig().getString("Settings.kit-message")).replace("%kit%", ckit).replace("%kit_displayname%", k.getDisplayName()));
 						} else {
 							p.sendMessage(colorize(plugin.getConfig().getString("Settings.kit-no-permission")).replace("%kit%", ckit).replace("%kit_displayname%", ckit));
@@ -161,51 +122,14 @@ public class AutoPvPKitCommand implements CommandExecutor {
                 	sender.sendMessage(colorize(plugin.getConfig().getString("Settings.kit-other-no-permission")));
                 	return true;
                 }
-                String name = p.getName();
                 String ckit = StringUtils.capitalize(kit);
 					if(sender.hasPermission("autopvpkit.kits." + kit) || sender.hasPermission("autopvpkit.kits.*")) {
-						Kit k = plugin.getKitsManager().getKit(kit);
-						PlayerInventory pinv = p.getInventory();
-						pinv.clear();
-						ItemStack helmet = k.getHelmet();
-						if(helmet != null) {
-							pinv.setHelmet(helmet);
-						}
-						ItemStack chestplate = k.getChestplate();
-						if(chestplate != null) {
-							pinv.setChestplate(chestplate);
-						}
-						ItemStack leggings = k.getLeggings();
-						if(leggings != null) {
-							pinv.setLeggings(leggings);
-						}
-						ItemStack boots = k.getBoots();
-						if(boots != null) {
-							pinv.setBoots(boots);
-						}
-						Map<Integer, ItemStack> items = k.getItems();
-						if(plugin.isDisableKitDrops() || plugin.isDisableKitDropsOnDeath()) {
-						Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-						plugin.getPlayerManager().setPlayerItems(p.getName(), new HashSet<>(items.values()));
-						});
-						}
-						if(plugin.getPlayerManager().getSavedPlayerKits().containsKey(name + "#" + k.getName())) {
-							plugin.getPlayerManager().getSavedPlayerKit(name, kit).getSavedItemSlots().entrySet().forEach(entry -> {
-								int slot = entry.getKey();
-								ItemStack itemStack = entry.getValue();
-								pinv.setItem(slot, itemStack);
-							});
-							plugin.hasKit.add(name);
-							plugin.getLastSelectedKits().put(name, k);
-							p.sendMessage(colorize(plugin.getConfig().getString("Settings.kit-message")).replace("%kit%", ckit).replace("%kit_displayname%", k.getDisplayName()));
-							sender.sendMessage(colorize(plugin.getConfig().getString("Settings.kit-message-other")).replace("%kit%", ckit).replace("%kit_displayname%", k.getDisplayName()).replace("%player%", p.getName()));
+						PlayerKitChangeEvent ce = new PlayerKitChangeEvent(p, ChangeReason.COMMAND_BY_OTHER);
+						Bukkit.getPluginManager().callEvent(ce);
+						if(ce.isCancelled()) {
 							return true;
 						}
-						items.keySet().forEach(slot -> {
-							pinv.setItem(slot, items.get(slot));
-						});
-						plugin.hasKit.add(name);
-						plugin.getLastSelectedKits().put(name, k);
+						Kit k = plugin.getAPI().setKit(p, kit, true);
 						p.sendMessage(colorize(plugin.getConfig().getString("Settings.kit-message")).replace("%kit%", ckit).replace("%kit_displayname%", k.getDisplayName()));
 						sender.sendMessage(colorize(plugin.getConfig().getString("Settings.kit-message-other")).replace("%kit%", ckit).replace("%kit_displayname%", k.getDisplayName()).replace("%player%", p.getName()));
 					} else {

@@ -82,7 +82,7 @@ public class PlayerManager {
 	public Map<String, SavedItemSlots> getSavedPlayerKits() {
 		return savedPlayerKits;
 	}
-
+	
 	/**
 	 * 
 	 * @param name player's name
@@ -91,6 +91,32 @@ public class PlayerManager {
 	 */
 	public SavedItemSlots getSavedPlayerKit(String name, String kitName) {
 		return savedPlayerKits.get(name + "#" + kitName);
+	}
+	
+	/**
+	 * 
+	 * @param name player name
+	 * @param kitName
+	 * @return
+	 */
+	public boolean hasSavedKit(String name, String kitName) {
+		return savedPlayerKits.containsKey(name + "#" + kitName);
+	}
+	
+	/**
+	 * 
+	 * @param name player name
+	 * @return
+	 */
+	@Deprecated
+	public boolean hasSavedKit(final String name) {
+		boolean has = false;
+      for(String key : savedPlayerKits.keySet()) {
+    	  if(key.startsWith(name)) {
+    		has = true;  
+    	  }
+      }
+      return has;
 	}
 	
 	public void setSavedPlayerKits(Map<String, SavedItemSlots> savedPlayerKits) {
