@@ -19,46 +19,44 @@ public class MoveListener implements Listener {
 	private AutoPvPKit plugin;
 	private String worldGuardRegion;
 	private Set<String> hasKit;
-	
-	public MoveListener(AutoPvPKit plugin) {this.plugin = plugin;
-	this.worldGuardRegion = this.plugin.getWorldGuardRegion();
-	this.hasKit = this.plugin.hasKit;}
-	
+
+	public MoveListener(AutoPvPKit plugin) {
+		this.plugin = plugin;
+		this.worldGuardRegion = this.plugin.getWorldGuardRegion();
+		this.hasKit = this.plugin.hasKit;
+	}
+
+	public void unregister() {
+		PlayerMoveEvent.getHandlerList().unregister(this);
+	}
+
 	@EventHandler
 	public void onMove(PlayerMoveEvent e) {
-		if(!plugin.isChangeOnWorldGuardRegion()) {
-			return;
-		}
-		// let's cache
+		if (!plugin.isChangeOnWorldGuardRegion()) return;
 		Location from = e.getFrom();
 		Location to = e.getTo();
 		int x = to.getBlockX();
 		int y = to.getBlockY();
-		int z= to.getBlockZ();
+		int z = to.getBlockZ();
 		Player p = e.getPlayer();
 		String name = p.getName();
 		World w = p.getWorld();
-		// check for a leg movement not head movement to prevent lag.
-		if(from.getBlockX() != x || from.getBlockY() != y || from.getBlockZ() != z) {
-			if(this.hasKit.contains(name)) {
-				return;
-			}
-			if(!plugin.getWorldGuardHook().getWorldGuard().getRegionManager(w).hasRegion(worldGuardRegion)) {
-				return;
-			}
-			if(plugin.getWorldGuardHook().getWorldGuard().getRegionManager(w).getRegion(worldGuardRegion).contains(x, y, z)) {
-				if(plugin.isDisabledWorld(w)) {
-					return;
-				}
+		if (from.getBlockX() != x || from.getBlockY() != y || from.getBlockZ() != z) {
+			if (this.hasKit.contains(name)) return;
+			if (!plugin.getWorldGuardHook().getWorldGuard().getRegionManager(w).hasRegion(worldGuardRegion)) return;
+			if (plugin.getWorldGuardHook()
+					.getWorldGuard()
+					.getRegionManager(w)
+					.getRegion(worldGuardRegion)
+					.contains(x, y, z)) {
+				if (plugin.isDisabledWorld(w)) return;
 				PlayerKitChangeEvent ce = new PlayerKitChangeEvent(p, ChangeReason.REGION_ENTRY);
 				Bukkit.getPluginManager().callEvent(ce);
-				if(ce.isCancelled()) {
-					return;
-				}
+				if (ce.isCancelled()) return;
 				plugin.getAPI().setKit(p, true);
-			    p.updateInventory();
+				p.updateInventory();
 			}
 		}
 	}
-	
+
 }

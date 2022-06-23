@@ -2,7 +2,7 @@
 # default permssions >
 # autopvpkit.kit = access to '/apk kit' command
 # autopvpkit.kits.<name> = access to a kit when you join/respawn/worldchange/worldguard-region-entry
-# autopvpkit.savekit = access to '/savekit' command which saves kit item slots to the slots you like them to be placed on when the kit gets selected for you.
+# autopvpkit.savekit = access to '/savekit' command which saves kit item slots to the slots you like them to be placed on when the kit gets selected for you. Also, '/savekit remove'.
 # admin permissions >
 # autopvpkit.kit.other = access to give other players a kit using '/apk kit <kit> <player>'
 # autopvpkit.kits.* = access to all kits
@@ -22,6 +22,7 @@ Settings:
   # placeholders: %kit%
   kit-save: "&7Your current kit has been saved with this inventory."
   kit-save-no-selected-kit: "&7You don't have any kit selected!"
+  kit-save-removed: "&7Removed the saved slots of your current kit."
   kit-save-no-permission: "&7Sorry, but you don't have permission to save kits."
   # placeholders: %kit% %kit_displayname%
   kit-message: "&7Selected kit: &c%kit%&7."
@@ -68,13 +69,15 @@ Kits:
       data: 0
       enchantments:
       - "power 1"
+      lore:
+      - "&cPower I"
       flags:
       - "HIDE_ENCHANT"
     2:
       item: ARROW
       amount: 2
       data: 0
-  gold:
+  vip:
     display-name: "&6Vip"
     helmet:
       item: DIAMOND_HELMET
@@ -96,6 +99,6 @@ Kits:
       item: IRON_SWORD
       amount: 1
       data: 0
-      name: "&6Vip &7sword"
+      name: "&6Vip &7Sword"
       enchantments:
       - "sharpness 1"

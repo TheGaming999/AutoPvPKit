@@ -13,20 +13,23 @@ public class PlayerKitSaveEvent extends Event implements Cancellable {
 	private Player player;
 	private Kit kit;
 	private static final HandlerList handlers = new HandlerList();
-	
+
 	public PlayerKitSaveEvent(Player player, Kit kit) {
 		this.setPlayer(player);
 		this.setKit(kit);
 	}
-	
+
+	@Override
 	public boolean isCancelled() {
 		return cancel;
 	}
 
+	@Override
 	public void setCancelled(boolean cancel) {
 		this.cancel = cancel;
 	}
 
+	@Override
 	public HandlerList getHandlers() {
 		return handlers;
 	}

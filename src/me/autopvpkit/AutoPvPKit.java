@@ -39,11 +39,11 @@ public class AutoPvPKit extends JavaPlugin {
 	private boolean changeOnWorldChange;
 	private boolean disableKitDrops;
 	private boolean disableKitDropsOnDeath;
-	
+
 	private boolean worldGuardHook_;
 	private boolean changeOnWorldGuardRegion;
 	private String worldGuardRegion;
-	
+
 	private JoinListener joinListener;
 	private RespawnListener respawnListener;
 	private WorldChangeListener worldChangeListener;
@@ -54,11 +54,12 @@ public class AutoPvPKit extends JavaPlugin {
 	private SavedItemSlots savedItemSlots;
 	private SaveKitCommand saveKitCommand;
 	private AutoPvPKitAPI apkAPI;
-	
+
 	private static AutoPvPKit instance;
 	public Set<String> hasKit;
 	private Map<String, Kit> lastSelectedKits;
-	
+
+	@Override
 	public void onEnable() {
 		lastSelectedKits = new ConcurrentHashMap<>();
 		configManager = new ConfigManager(this);
@@ -66,15 +67,11 @@ public class AutoPvPKit extends JavaPlugin {
 		savedKits = configManager.loadConfig("saved_kits.yml");
 		disabledWorlds = new HashSet<>();
 		hasKit = new HashSet<>();
-		// for silly users
 		getConfig().getStringList("Settings.disabled-worlds").forEach(world_ -> {
 			Bukkit.getWorlds().forEach(world -> {
-				if(world_.equalsIgnoreCase(world.getName())) {
-					disabledWorlds.add(world.getName());
-				}
+				if (world_.equalsIgnoreCase(world.getName())) disabledWorlds.add(world.getName());
 			});
 		});
-		//
 		changeOnSpawn = getConfig().getBoolean("Settings.change-on-spawn");
 		changeOnRespawn = getConfig().getBoolean("Settings.change-on-respawn");
 		changeOnWorldChange = getConfig().getBoolean("Settings.change-on-world-change");
@@ -83,15 +80,9 @@ public class AutoPvPKit extends JavaPlugin {
 		worldGuardHook_ = getConfig().getBoolean("Settings.worldguard-hook");
 		changeOnWorldGuardRegion = getConfig().getBoolean("WorldGuard-Settings.change-on-worldguard-region");
 		worldGuardRegion = getConfig().getString("WorldGuard-Settings.worldguard-region");
-		
-        registerListeners();
-		if(disableKitDrops || disableKitDropsOnDeath) {
-			
-		}
-
-		if(worldGuardHook_ && Bukkit.getPluginManager().isPluginEnabled("WorldGuard")) {
+		registerListeners();
+		if (worldGuardHook_ && Bukkit.getPluginManager().isPluginEnabled("WorldGuard"))
 			worldGuardHook = new WorldGuardHook(this);
-		}
 		kitsManager = new KitsManager(this);
 		autoPvpKitCommand = new AutoPvPKitCommand(this);
 		getCommand("autopvpkit").setExecutor(autoPvpKitCommand);
@@ -106,73 +97,83 @@ public class AutoPvPKit extends JavaPlugin {
 		instance = this;
 		apkAPI = new AutoPvPKitAPI();
 	}
-	
+
+	@Override
 	public void onDisable() {
 		playerManager.saveSavedPlayerKits();
+		unregisterListeners();
 		Bukkit.getConsoleSender().sendMessage(colorize("&e[&9AutoPvPKit&e] &cDisabled."));
 	}
-	
+
 	public String colorize(String string) {
 		return ChatColor.translateAlternateColorCodes('&', string);
 	}
-	
+
 	public void registerListeners() {
-		if(changeOnSpawn) {
+		if (changeOnSpawn) {
 			joinListener = new JoinListener(this);
 			Bukkit.getPluginManager().registerEvents(joinListener, this);
 		}
-		if(changeOnRespawn) {
+		if (changeOnRespawn) {
 			respawnListener = new RespawnListener(this);
 			Bukkit.getPluginManager().registerEvents(respawnListener, this);
 		}
-		if(changeOnWorldChange) {
+		if (changeOnWorldChange) {
 			worldChangeListener = new WorldChangeListener(this);
 			Bukkit.getPluginManager().registerEvents(worldChangeListener, this);
 		}
-		if(disableKitDrops) {
+		if (disableKitDrops) {
 			itemDropListener = new ItemDropListener(this);
 			Bukkit.getPluginManager().registerEvents(itemDropListener, this);
 		}
 		deathDropListener = new DeathDropListener(this);
-	    Bukkit.getPluginManager().registerEvents(deathDropListener, this);
+		Bukkit.getPluginManager().registerEvents(deathDropListener, this);
 	}
-	
+
+	public void unregisterListeners() {
+		if (joinListener != null) joinListener.unregister();
+		if (respawnListener != null) respawnListener.unregister();
+		if (worldChangeListener != null) worldChangeListener.unregister();
+		if (itemDropListener != null) itemDropListener.unregister();
+		if (deathDropListener != null) deathDropListener.unregister();
+	}
+
 	public boolean isChangeOnSpawn() {
 		return this.changeOnSpawn;
 	}
-	
+
 	public boolean isChangeOnRespawn() {
 		return this.changeOnRespawn;
 	}
-	
+
 	public boolean isChangeOnWorldChange() {
 		return this.changeOnWorldChange;
 	}
-	
+
 	public boolean isDisableKitDrops() {
 		return this.disableKitDrops;
 	}
-	
+
 	public boolean isDisableKitDropsOnDeath() {
 		return this.disableKitDropsOnDeath;
 	}
-	
+
 	public Set<String> getDisabledWorlds() {
 		return this.disabledWorlds;
 	}
-	
+
 	public boolean isDisabledWorld(World world) {
 		return this.disabledWorlds.contains(world.getName());
 	}
-	
+
 	public KitsManager getKitsManager() {
 		return this.kitsManager;
 	}
-	
+
 	public PlayerManager getPlayerManager() {
 		return this.playerManager;
 	}
-	
+
 	public WorldGuardHook getWorldGuardHook() {
 		return this.worldGuardHook;
 	}
@@ -193,6 +194,7 @@ public class AutoPvPKit extends JavaPlugin {
 		this.worldGuardRegion = worldGuardRegion;
 	}
 
+	@Override
 	public FileConfiguration getConfig() {
 		return config;
 	}
@@ -208,19 +210,21 @@ public class AutoPvPKit extends JavaPlugin {
 	public void setSavedKitsConfig(FileConfiguration savedKits) {
 		this.savedKits = savedKits;
 	}
-	
+
+	@Override
 	public void reloadConfig() {
 		this.configManager.reloadConfig("config.yml");
 	}
-	
+
+	@Override
 	public void saveConfig() {
 		this.configManager.saveConfig("config.yml");
 	}
-	
+
 	public void reloadSavedKitsConfig() {
 		this.configManager.reloadConfig("saved_kits.yml");
 	}
-	
+
 	public void saveSavedKitsConfig() {
 		this.configManager.saveConfig("saved_kits.yml");
 	}
@@ -241,7 +245,7 @@ public class AutoPvPKit extends JavaPlugin {
 	public Kit getPlayerLastSelectedKit(String name) {
 		return lastSelectedKits.get(name);
 	}
-	
+
 	public Map<String, Kit> getLastSelectedKits() {
 		return lastSelectedKits;
 	}
@@ -249,7 +253,7 @@ public class AutoPvPKit extends JavaPlugin {
 	public void setLastSelectedKits(Map<String, Kit> lastSelectedKits) {
 		this.lastSelectedKits = lastSelectedKits;
 	}
-	
+
 	public SaveKitCommand getSaveKitCommand() {
 		return this.saveKitCommand;
 	}
@@ -257,11 +261,11 @@ public class AutoPvPKit extends JavaPlugin {
 	public AutoPvPKitCommand getAutoPvPKitCommand() {
 		return this.autoPvpKitCommand;
 	}
-	
+
 	public AutoPvPKitAPI getAPI() {
 		return this.apkAPI;
 	}
-	
+
 	public static AutoPvPKit getInstance() {
 		return instance;
 	}
@@ -269,5 +273,5 @@ public class AutoPvPKit extends JavaPlugin {
 	public static void setInstance(AutoPvPKit instance) {
 		AutoPvPKit.instance = instance;
 	}
-	
+
 }

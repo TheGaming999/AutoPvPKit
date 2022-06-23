@@ -14,27 +14,33 @@ import me.autopvpkit.events.PlayerKitChangeEvent;
 public class JoinListener implements Listener {
 
 	private AutoPvPKit plugin;
-	
-	public JoinListener(AutoPvPKit plugin) {this.plugin = plugin;}
-	
-	@EventHandler(priority=EventPriority.HIGHEST)
+
+	public JoinListener(AutoPvPKit plugin) {
+		this.plugin = plugin;
+	}
+
+	public void unregister() {
+		PlayerJoinEvent.getHandlerList().unregister(this);
+	}
+
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onJoin(PlayerJoinEvent e) {
 		Bukkit.getScheduler().runTaskLater(plugin, () -> {
-		if(!plugin.isChangeOnSpawn()) {
-			return;
-		}
-		Player p = e.getPlayer();
-		if(plugin.isDisabledWorld(p.getWorld())) {
-			return;
-		}
-		PlayerKitChangeEvent ce = new PlayerKitChangeEvent(p, ChangeReason.JOIN);
-		Bukkit.getPluginManager().callEvent(ce);
-		if(ce.isCancelled()) {
-			return;
-		}
-        plugin.getAPI().setKit(p, true);
-		p.updateInventory();
+			if (!plugin.isChangeOnSpawn()) {
+				return;
+			}
+			Player p = e.getPlayer();
+			if (plugin.isDisabledWorld(p.getWorld())) {
+				return;
+			}
+			PlayerKitChangeEvent ce = new PlayerKitChangeEvent(p, ChangeReason.JOIN);
+			Bukkit.getPluginManager().callEvent(ce);
+			if (ce.isCancelled()) {
+				return;
+			}
+			plugin.getAPI().setKit(p, true);
+			p.updateInventory();
 		}, 5);
 	}
-	
+
 }
