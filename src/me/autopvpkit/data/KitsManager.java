@@ -86,7 +86,8 @@ public class KitsManager {
 				});
 			}
 			helmetStack.setItemMeta(helmetMeta);
-			helmetStack = NBTEditor.set(helmetStack, true, "autopvpkit");
+			if (plugin.isDisableKitDrops() || plugin.isDisableKitDropsOnDeath())
+				helmetStack = NBTEditor.set(helmetStack, true, "autopvpkit");
 			kit.setHelmet(helmetStack);
 			// CHESTPLATE
 			ItemStack chestplateStack = null;
@@ -123,7 +124,8 @@ public class KitsManager {
 				});
 			}
 			chestplateStack.setItemMeta(chestplateMeta);
-			chestplateStack = NBTEditor.set(chestplateStack, true, "autopvpkit");
+			if (plugin.isDisableKitDrops() || plugin.isDisableKitDropsOnDeath())
+				chestplateStack = NBTEditor.set(chestplateStack, true, "autopvpkit");
 			kit.setChestplate(chestplateStack);
 			// LEGGINGS
 			ItemStack leggingsStack = null;
@@ -160,7 +162,8 @@ public class KitsManager {
 				});
 			}
 			leggingsStack.setItemMeta(leggingsMeta);
-			leggingsStack = NBTEditor.set(leggingsStack, true, "autopvpkit");
+			if (plugin.isDisableKitDrops() || plugin.isDisableKitDropsOnDeath())
+				leggingsStack = NBTEditor.set(leggingsStack, true, "autopvpkit");
 			kit.setLeggings(leggingsStack);
 			// BOOTS
 			ItemStack bootsStack = null;
@@ -197,7 +200,8 @@ public class KitsManager {
 				});
 			}
 			bootsStack.setItemMeta(bootsMeta);
-			bootsStack = NBTEditor.set(bootsStack, true, "autopvpkit");
+			if (plugin.isDisableKitDrops() || plugin.isDisableKitDropsOnDeath())
+				bootsStack = NBTEditor.set(bootsStack, true, "autopvpkit");
 			kit.setBoots(bootsStack);
 			ConfigurationSection itemsPath = kitsPath.getConfigurationSection(kitName);
 			itemsPath.getKeys(false).forEach(itemSlot -> {
@@ -236,7 +240,8 @@ public class KitsManager {
 						});
 					}
 					normalStack.setItemMeta(normalMeta);
-					normalStack = NBTEditor.set(normalStack, true, "autopvpkit");
+					if (plugin.isDisableKitDrops() || plugin.isDisableKitDropsOnDeath())
+						normalStack = NBTEditor.set(normalStack, true, "autopvpkit");
 					kit.addItem(Integer.parseInt(itemSlot), normalStack);
 				}
 			});
